@@ -18,6 +18,7 @@ void bluetoothTick() {
       getString = false;
       loadingFlag = true;
       thisLength = runningText.length();
+      showText = true;
       updateSettings();
       return;
     }
@@ -44,6 +45,10 @@ void bluetoothTick() {
         break;
       case 5: // цвет
         thisColor = intData[1];
+        break;
+      case 6: // авто
+        autoFlag = intData[1];
+        if (autoFlag) showText = true;
         break;
     }
     if (intData[0] > 0) updateSettings();

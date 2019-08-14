@@ -44,7 +44,7 @@ timerMinim scrollTimer(D_TEXT_SPEED);
 timerMinim eepromTimer(5000);
 
 String runningText = "";
-boolean loadingFlag, fullTextFlag, runningState = true, eepromFlag = false, autoFlag = true;
+boolean loadingFlag, fullTextFlag, runningState = true, eepromFlag = false, autoFlag = true, showText = true;
 byte thisSpeed, thisBright, thisMode, thisColor, thisLength;
 
 void setup() {

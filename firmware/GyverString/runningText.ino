@@ -17,31 +17,32 @@ int offset = WIDTH;
 void fillString(String text, byte color) {
   if (loadingFlag) {
     offset = WIDTH;   // перемотка в правый край
-    loadingFlag = false;    
+    loadingFlag = false;
     fullTextFlag = false;
   }
-  
-  if (scrollTimer.isReady()) {
-    FastLED.clear();
-    byte i = 0, j = 0;
-    while (text[i] != '\0') {
-      if ((byte)text[i] > 191) {    // работаем с русскими буквами!
-        i++;
-      } else {
-        drawLetter(j, text[i], offset + j * (LET_WIDTH + SPACE), color);
-        i++;
-        j++;        
-      }
-    }
-    //thisLength = j;
-    fullTextFlag = false;
 
-    offset--;
-    if (offset < -j * (LET_WIDTH + SPACE)) {    // строка убежала
-      offset = WIDTH + 3;
-      fullTextFlag = true;
+
+  if (scrollTimer.isReady()) {
+    if (showText) {
+      FastLED.clear();
+      byte i = 0, j = 0;
+      while (text[i] != '\0') {
+        if ((byte)text[i] > 191) {    // работаем с русскими буквами!
+          i++;
+        } else {
+          drawLetter(j, text[i], offset + j * (LET_WIDTH + SPACE), color);
+          i++;
+          j++;
+        }
+      }
+
+      offset--;
+      if (offset < -j * (LET_WIDTH + SPACE)) {    // строка убежала
+        offset = WIDTH + 3;
+        if (!autoFlag) showText = false;
+      }
+      FastLED.show();
     }
-    FastLED.show();
   }
 }
 
