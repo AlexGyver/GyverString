@@ -1,5 +1,5 @@
 /*
-  Скетч к проекту "Бегущая строка на адресных диодах"
+  Скетч к проекту "Бегущая строка"
   Страница проекта (схемы, описания): https://alexgyver.ru/GyverString/
   Исходники на GitHub: https://github.com/AlexGyver/GyverString/
   Нравится, как написан код? Поддержи автора! https://alexgyver.ru/support_alex/

@@ -8,39 +8,28 @@
 */
 
 // ================ НАСТРОЙКИ ================
-#define BRIGHTNESS 50         // стандартная яркость (0-255)
-#define CURRENT_LIMIT 2000    // лимит по току в миллиамперах, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
+#define MATR_NUM 4            // количество матриц последовательно
 
-#define WIDTH 32              // ширина матрицы
-#define HEIGHT 8              // высота матрицы
-#define SEGMENTS 1            // диодов в одном "пикселе" (для создания матрицы из кусков ленты)
-
-#define COLOR_ORDER GRB       // порядок цветов на ленте. Если цвет отображается некорректно - меняйте. Начать можно с RGB
-
-#define MATRIX_TYPE 0         // тип матрицы: 0 - зигзаг, 1 - параллельная
-#define CONNECTION_ANGLE 0    // угол подключения: 0 - левый нижний, 1 - левый верхний, 2 - правый верхний, 3 - правый нижний
-#define STRIP_DIRECTION 1     // направление ленты из угла: 0 - вправо, 1 - вверх, 2 - влево, 3 - вниз
-// при неправильной настрйоке матрицы вы получите предупреждение "Wrong matrix parameters! Set to default"
-// шпаргалка по настройке матрицы здесь! https://alexgyver.ru/matrix_guide/
-
-#define D_TEXT_SPEED 100      // скорость бегущего текста по умолчанию (мс)
 // ============ ДЛЯ РАЗРАБОТЧИКОВ ============
 // ПИНЫ
 #define BT_RX 3
 #define BT_TX 2
-#define LED_PIN 4
 
 // БИБЛИОТЕКИ
 #include <SoftwareSerial.h>
 #include <avr/eeprom.h>
-#include <FastLED.h>
+#include <SPI.h>
+#include <Adafruit_GFX.h>
+#include <Max72xxPanel.h>
 #include "fonts.h"
 #include "timerMinim.h"
 
-const int NUM_LEDS = WIDTH * HEIGHT * SEGMENTS;
-CRGB leds[NUM_LEDS];
+#define WIDTH MATR_NUM*8      // ширина матрицы
+#define HEIGHT 8              // высота матрицы
+
+Max72xxPanel matrix = Max72xxPanel(10, 4, 1);
 SoftwareSerial btSerial(BT_TX, BT_RX); // RX, TX
-timerMinim scrollTimer(D_TEXT_SPEED);
+timerMinim scrollTimer(100);
 timerMinim eepromTimer(5000);
 
 String runningText = "";
@@ -71,12 +60,13 @@ void setup() {
     runningText += (char)eeprom_read_byte((uint8_t*)i);
   }
 
-  // настройки ленты
-  FastLED.addLeds<WS2812, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-  FastLED.setBrightness(thisBright);
-  if (CURRENT_LIMIT > 0) FastLED.setMaxPowerInVoltsAndMilliamps(5, CURRENT_LIMIT);
-  FastLED.clear();
-  FastLED.show();
+  matrix.setIntensity(50);
+  for (byte i = 0; i < MATR_NUM; i++) {
+    // матрицы расположены криво, здесь поворачиваем
+    matrix.setRotation(i, 1);
+  }
+  matrix.fillScreen(LOW);
+  matrix.write();
 
   scrollTimer.setInterval(thisSpeed);
 }
@@ -93,7 +83,7 @@ void toggleText(boolean state) {
     loadingFlag = true;
   } else {
     runningState = false;
-    FastLED.clear();
-    FastLED.show();
+    matrix.fillScreen(LOW);
+    matrix.write();
   }
 }
