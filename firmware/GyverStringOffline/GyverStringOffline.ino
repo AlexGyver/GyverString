@@ -25,7 +25,7 @@ String text5 = "состояние ";
 String text6 = "ОТЛИЧНОЕ, ";
 #define COLOR6 CRGB::Green
 
-String text7 = "возможен торг";
+String text7 = "";
 #define COLOR7 CRGB::Yellow
 
 String text8 = "";
@@ -43,7 +43,7 @@ String text10 = "";
 
 #define CURRENT_LIMIT 2000    // лимит по току в миллиамперах, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
 
-#define WIDTH 32              // ширина матрицы
+#define WIDTH 42              // ширина матрицы
 #define HEIGHT 8              // высота матрицы
 #define SEGMENTS 1            // диодов в одном "пикселе" (для создания матрицы из кусков ленты)
 
@@ -51,7 +51,7 @@ String text10 = "";
 
 #define MATRIX_TYPE 0         // тип матрицы: 0 - зигзаг, 1 - параллельная
 #define CONNECTION_ANGLE 0    // угол подключения: 0 - левый нижний, 1 - левый верхний, 2 - правый верхний, 3 - правый нижний
-#define STRIP_DIRECTION 1     // направление ленты из угла: 0 - вправо, 1 - вверх, 2 - влево, 3 - вниз
+#define STRIP_DIRECTION 0     // направление ленты из угла: 0 - вправо, 1 - вверх, 2 - влево, 3 - вниз
 // при неправильной настрйоке матрицы вы получите предупреждение "Wrong matrix parameters! Set to default"
 // шпаргалка по настройке матрицы здесь! https://alexgyver.ru/matrix_guide/
 
@@ -84,7 +84,7 @@ const uint32_t textColors[] PROGMEM = {
 int colorChange[10];
 
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
   randomSeed(analogRead(0));
 
   // настройки ленты
@@ -93,6 +93,7 @@ void setup() {
   if (CURRENT_LIMIT > 0) FastLED.setMaxPowerInVoltsAndMilliamps(5, CURRENT_LIMIT);
   FastLED.clear();
   FastLED.show();
+
   runningText = String(text1) + text2 + text3 + text4 + text5 + text6 + text7 + text8 + text9 + text10;
   colorChange[0] = stringLength(text1);
   colorChange[1] = colorChange[0] + stringLength(text2);

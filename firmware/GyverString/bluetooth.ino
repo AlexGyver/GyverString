@@ -4,7 +4,7 @@
 #define ending ';'        // завершающий символ
 int intData[PARSE_AMOUNT];     // массив численных значений после парсинга
 boolean recievedFlag;
-String request = "1234567891011121314151617181920";
+String request = "";
 boolean getStarted;
 byte index;
 String string_convert = "";
@@ -12,6 +12,7 @@ boolean parseString, getString;
 
 void bluetoothTick() {
   parsing();              // функция парсинга
+
   if (recievedFlag) {     // если получены данные
     recievedFlag = false;
     if (getString) {
@@ -33,7 +34,7 @@ void bluetoothTick() {
         toggleText(intData[1]);
         break;
       case 2: // скорость
-        thisSpeed = 258 - intData[1];
+        thisSpeed = 110 - intData[1];
         scrollTimer.setInterval(thisSpeed);
         break;
       case 3: // яркость
@@ -63,7 +64,7 @@ void parsing() {
       runningText = btSerial.readString();  // принимаем всю
       incomingByte = ending;              // сразу завершаем парс
     } else {
-      incomingByte = btSerial.read();      // обязательно ЧИТАЕМ входящий символ
+      incomingByte = btSerial.read();      // обязательно ЧИТАЕМ входящий символ      
     }
     if (getStarted) {                         // если приняли начальный символ (парсинг разрешён)
       if (incomingByte != divider && incomingByte != ending) {  // если это не пробел И не конец

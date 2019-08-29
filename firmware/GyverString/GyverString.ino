@@ -11,7 +11,7 @@
 #define BRIGHTNESS 50         // стандартная яркость (0-255)
 #define CURRENT_LIMIT 2000    // лимит по току в миллиамперах, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
 
-#define WIDTH 32              // ширина матрицы
+#define WIDTH 42              // ширина матрицы
 #define HEIGHT 8              // высота матрицы
 #define SEGMENTS 1            // диодов в одном "пикселе" (для создания матрицы из кусков ленты)
 
@@ -19,7 +19,7 @@
 
 #define MATRIX_TYPE 0         // тип матрицы: 0 - зигзаг, 1 - параллельная
 #define CONNECTION_ANGLE 0    // угол подключения: 0 - левый нижний, 1 - левый верхний, 2 - правый верхний, 3 - правый нижний
-#define STRIP_DIRECTION 1     // направление ленты из угла: 0 - вправо, 1 - вверх, 2 - влево, 3 - вниз
+#define STRIP_DIRECTION 0     // направление ленты из угла: 0 - вправо, 1 - вверх, 2 - влево, 3 - вниз
 // при неправильной настрйоке матрицы вы получите предупреждение "Wrong matrix parameters! Set to default"
 // шпаргалка по настройке матрицы здесь! https://alexgyver.ru/matrix_guide/
 
@@ -52,8 +52,8 @@ void setup() {
   btSerial.begin(9600);
   btSerial.setTimeout(100);
   randomSeed(analogRead(0));
-  if (eeprom_read_byte((uint8_t*)1023) != 123) {
-    eeprom_write_byte((uint8_t*)1023, 123);
+  if (eeprom_read_byte((uint8_t*)1023) != 100) {
+    eeprom_write_byte((uint8_t*)1023, 100);
     for (int i = 10; i < 300; i++) eeprom_write_byte((uint8_t*)i, 0);
     eeprom_write_byte((uint8_t*)0, 60);
     eeprom_write_byte((uint8_t*)1, 60);
@@ -67,8 +67,10 @@ void setup() {
   thisColor = eeprom_read_byte((uint8_t*)3);
   thisLength = eeprom_read_byte((uint8_t*)4);
 
-  for (byte i = 10; i < thisLength + 10; i++) {
-    runningText += (char)eeprom_read_byte((uint8_t*)i);
+  if (thisLength > 0) {
+    for (byte i = 10; i < thisLength + 10; i++) {
+      runningText += (char)eeprom_read_byte((uint8_t*)i);
+    }
   }
 
   // настройки ленты
