@@ -7,6 +7,8 @@
   https://AlexGyver.ru/
 */
 
+//  Версия 1.2 - исправлена ошибка с количеством матриц
+
 // ================ НАСТРОЙКИ ================
 #define MATR_NUM 4            // количество матриц последовательно
 
@@ -27,7 +29,7 @@
 #define WIDTH MATR_NUM*8      // ширина матрицы
 #define HEIGHT 8              // высота матрицы
 
-Max72xxPanel matrix = Max72xxPanel(10, 4, 1);
+Max72xxPanel matrix = Max72xxPanel(10, MATR_NUM, 1);
 SoftwareSerial btSerial(BT_TX, BT_RX); // RX, TX
 timerMinim scrollTimer(100);
 timerMinim eepromTimer(5000);
