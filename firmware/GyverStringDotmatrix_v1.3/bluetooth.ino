@@ -33,7 +33,7 @@ void bluetoothTick() {
         toggleText(intData[1]);
         break;
       case 2: // скорость
-        thisSpeed = 258 - intData[1];
+        thisSpeed = 110 - intData[1];
         scrollTimer.setInterval(thisSpeed);
         break;
       case 3: // яркость
