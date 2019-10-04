@@ -5,41 +5,52 @@
   Нравится, как написан код? Поддержи автора! https://alexgyver.ru/support_alex/
   Автор: AlexGyver, AlexGyver Technologies, 2019
   https://AlexGyver.ru/
+
+  Версия 1.1: прошивка оптимизирована под широкие матрицы (до 80 пикс)
 */
 
+#define BLACK 0x000000
+#define GREEN 0x00FF00
+#define RED 0xFF0000
+#define BLUE 0x0000FF
+#define PURPLE 0xFF00FF
+#define YELLOW 0xFFFF00
+#define CYAN 0x00FFFF
+#define WHITE 0xFFFFFF
+
 String text1 = "продам ";
-#define COLOR1 CRGB::White
+#define COLOR1 WHITE
 
 String text2 = "гараж ";
-#define COLOR2 CRGB::Red
+#define COLOR2 RED
 
 String text3 = "тел. ";
-#define COLOR3 CRGB::White
+#define COLOR3 WHITE
 
 String text4 = "+7(945)259-63-54 ";
-#define COLOR4 CRGB::Blue
+#define COLOR4 BLUE
 
 String text5 = "состояние ";
-#define COLOR5 CRGB::White
+#define COLOR5 WHITE
 
 String text6 = "ОТЛИЧНОЕ, ";
-#define COLOR6 CRGB::Green
+#define COLOR6 GREEN
 
 String text7 = "";
-#define COLOR7 CRGB::Yellow
+#define COLOR7 YELLOW
 
 String text8 = "";
-#define COLOR8 CRGB::White
+#define COLOR8 WHITE
 
 String text9 = "";
-#define COLOR9 CRGB::White
+#define COLOR9 WHITE
 
 String text10 = "";
-#define COLOR10 CRGB::White
+#define COLOR10 WHITE
 
 // ================ НАСТРОЙКИ ================
-#define BRIGHTNESS 150         // стандартная яркость (0-255)
-#define D_TEXT_SPEED 50      // скорость бегущего текста по умолчанию (мс)
+#define BRIGHTNESS 150        // стандартная яркость (0-255)
+#define D_TEXT_SPEED 50       // скорость бегущего текста по умолчанию (мс)
 
 #define CURRENT_LIMIT 2500    // лимит по току в миллиамперах, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
 
@@ -60,11 +71,16 @@ String text10 = "";
 #define LED_PIN 4
 
 // БИБЛИОТЕКИ
-#include <FastLED.h>
+//#include <FastLED.h>
+#define COLOR_DEBTH 2   // цветовая глубина: 1, 2, 3 (в байтах)
+#define ORDER_GRB       // ORDER_GRB / ORDER_RGB
+
+#include "microLED.h"
 #include "fonts.h"
 
 const int NUM_LEDS = WIDTH * HEIGHT * SEGMENTS;
-CRGB leds[NUM_LEDS];
+LEDdata leds[NUM_LEDS];
+microLED strip(leds, NUM_LEDS, LED_PIN);  // объект лента
 
 uint32_t scrollTimer;
 String runningText = "";
@@ -84,15 +100,15 @@ const uint32_t textColors[] PROGMEM = {
 int colorChange[10];
 
 void setup() {
-  Serial.begin(9600);
+  //Serial.begin(9600);
   randomSeed(analogRead(0));
 
   // настройки ленты
-  FastLED.addLeds<WS2812, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-  FastLED.setBrightness(BRIGHTNESS);
-  if (CURRENT_LIMIT > 0) FastLED.setMaxPowerInVoltsAndMilliamps(5, CURRENT_LIMIT);
-  FastLED.clear();
-  FastLED.show();
+  //strip.addLeds<WS2812, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+  strip.setBrightness(BRIGHTNESS);
+  //if (CURRENT_LIMIT > 0) strip.setMaxPowerInVoltsAndMilliamps(5, CURRENT_LIMIT);
+  strip.clear();
+  strip.show();
 
   runningText = String(text1) + text2 + text3 + text4 + text5 + text6 + text7 + text8 + text9 + text10;
   colorChange[0] = stringLength(text1);
