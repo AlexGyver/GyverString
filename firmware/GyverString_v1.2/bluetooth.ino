@@ -50,6 +50,7 @@ void bluetoothTick() {
       case 6: // авто
         autoFlag = intData[1];
         if (autoFlag) showText = true;
+        else showText = false;
         break;
     }
     if (intData[0] > 0) updateSettings();
