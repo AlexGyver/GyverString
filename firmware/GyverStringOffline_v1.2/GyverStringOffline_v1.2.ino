@@ -9,44 +9,44 @@
   Версия 1.1: прошивка оптимизирована под широкие матрицы (до 80 пикс)
 */
 
-#define BLACK 0x000000
-#define GREEN 0x00FF00
-#define RED 0xFF0000
-#define BLUE 0x0000FF
-#define PURPLE 0xFF00FF
-#define YELLOW 0xFFFF00
-#define CYAN 0x00FFFF
-#define WHITE 0xFFFFFF
+#define C_BLACK 0x000000
+#define C_GREEN 0x00FF00
+#define C_RED 0xFF0000
+#define C_BLUE 0x0000FF
+#define C_PURPLE 0xFF00FF
+#define C_YELLOW 0xFFFF00
+#define C_CYAN 0x00FFFF
+#define C_WHITE 0xFFFFFF
 
 String text1 = "продам ";
-#define COLOR1 WHITE
+#define COLOR1 C_WHITE
 
 String text2 = "гараж ";
-#define COLOR2 RED
+#define COLOR2 C_RED
 
 String text3 = "тел. ";
-#define COLOR3 WHITE
+#define COLOR3 C_WHITE
 
 String text4 = "+7(945)259-63-54 ";
-#define COLOR4 BLUE
+#define COLOR4 C_BLUE
 
 String text5 = "состояние ";
-#define COLOR5 WHITE
+#define COLOR5 C_WHITE
 
 String text6 = "ОТЛИЧНОЕ, ";
-#define COLOR6 GREEN
+#define COLOR6 C_GREEN
 
 String text7 = "";
-#define COLOR7 YELLOW
+#define COLOR7 C_YELLOW
 
 String text8 = "";
-#define COLOR8 WHITE
+#define COLOR8 C_WHITE
 
 String text9 = "";
-#define COLOR9 WHITE
+#define COLOR9 C_WHITE
 
 String text10 = "";
-#define COLOR10 WHITE
+#define COLOR10 C_WHITE
 
 // ================ НАСТРОЙКИ ================
 #define BRIGHTNESS 150        // стандартная яркость (0-255)
