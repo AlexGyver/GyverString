@@ -66,7 +66,7 @@ uint32_t setColor(int index) {
   }
 }
 
-void drawLetter(int index, uint8_t letter, int offset, int letterColor) {
+void drawLetter(int index, uint8_t letter, int offset, uint32_t letterColor) {
   int start_pos = 0, finish_pos = LET_WIDTH;
 
   if (offset < -LET_WIDTH || offset > WIDTH) return;
