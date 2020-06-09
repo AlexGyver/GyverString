@@ -9,49 +9,70 @@
   Версия 1.1: прошивка оптимизирована под широкие матрицы (до 80 пикс)
   Версия 1.3: исправлен баг с красным цветом
 */
+#include "ctext.h"
+#define ostr(n,s) const char n[] PROGMEM = s
 
-#define C_BLACK 0x000000
-#define C_GREEN 0x00FF00
-#define C_RED 0xFF0000
-#define C_BLUE 0x0000FF
-#define C_PURPLE 0xFF00FF
-#define C_YELLOW 0xFFFF00
-#define C_CYAN 0x00FFFF
-#define C_WHITE 0xFFFFFF
+const int strcount = 6;
 
-String text1 = "продам ";
-#define COLOR1 C_WHITE
+ostr(string_1,"продам ");
+ostr(string_2,"гараж ");
+ostr(string_3,"тел. ");
+ostr(string_4,"+7(945)259-63-54 ");
+ostr(string_5,"состояние ");
+ostr(string_6,"ОТЛИЧНОЕ, ");
 
-String text2 = "гараж ";
-#define COLOR2 C_RED
-
-String text3 = "тел. ";
-#define COLOR3 C_WHITE
-
-String text4 = "+7(945)259-63-54 ";
-#define COLOR4 C_BLUE
-
-String text5 = "состояние ";
-#define COLOR5 C_WHITE
-
-String text6 = "ОТЛИЧНОЕ, ";
-#define COLOR6 C_GREEN
-
-String text7 = "";
-#define COLOR7 C_YELLOW
-
-String text8 = "";
-#define COLOR8 C_WHITE
-
-String text9 = "";
-#define COLOR9 C_WHITE
-
-String text10 = "";
-#define COLOR10 C_WHITE
+const char *const strings[] PROGMEM = {
+  string_1,
+  string_2,
+  string_3,
+  string_4,
+  string_5,
+  string_6,
+};
+const uint32_t scolors[] PROGMEM = {
+  C_WHITE,
+  C_RED,
+  C_WHITE,
+  C_BLUE,
+  C_WHITE,
+  C_GREEN,
+};
+const uint8_t sanims[] PROGMEM = {
+  RIGHT_TO_LEFT,
+  LEFT_TO_RIGHT,
+  UP_TO_DOWN,
+  DOWN_TO_UP,
+  RIGHT_TO_LEFT,
+  LEFT_TO_RIGHT,
+};
+const uint16_t sticktimes[] PROGMEM = {
+  0,
+  0,
+  0,
+  1000,
+  200,
+  1000
+};
+const uint8_t rainbows[] PROGMEM = {
+  0,
+  0,
+  0,
+  0,
+  0,
+  255,
+};
+const uint8_t srainbowfades[] PROGMEM = {
+  RB_CONSTANT,
+  RB_CONSTANT,
+  RB_CONSTANT,
+  RB_CONSTANT,
+  RB_FADE_IN,
+  RB_FADE_OUT,
+};
 
 // ================ НАСТРОЙКИ ================
 #define BRIGHTNESS 150        // стандартная яркость (0-255)
-#define D_TEXT_SPEED 50       // скорость бегущего текста по умолчанию (мс)
+#define D_TEXT_SPEED 50       // скорость бегущего текста по умолчанию (мс/пиксель)
 
 #define CURRENT_LIMIT 2500    // лимит по току в миллиамперах, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
 
@@ -78,52 +99,105 @@ String text10 = "";
 
 #include "microLED.h"
 #include "fonts.h"
+#include "textcfg.h"
 
 const int NUM_LEDS = WIDTH * HEIGHT * SEGMENTS;
 LEDdata leds[NUM_LEDS];
 microLED strip(leds, NUM_LEDS, LED_PIN);  // объект лента
 
 uint32_t scrollTimer;
-String runningText = "";
 boolean loadingFlag, fullTextFlag;
-const uint32_t textColors[] PROGMEM = {
-  COLOR1,
-  COLOR2,
-  COLOR3,
-  COLOR4,
-  COLOR5,
-  COLOR6,
-  COLOR7,
-  COLOR8,
-  COLOR9,
-  COLOR10,
-};
-int colorChange[10];
+
+ctext runningText;
+int current_text = 0;
+
+int xoffset;
+int yoffset;
+
+int dxoffset; // default offset
+int dyoffset;
+
+int cxoffset; // offset direction
+int cyoffset;
+
+int stxpos; // stop position
+int stypos;
+
+int htxpos; // stick position
+int htypos;
+int sticktimer;
+int sticking = false;
+
+void setctext() {
+  runningText = get_ctext(current_text);
+  int len = stringLength(runningText.text)*(LET_WIDTH+SPACE);
+  dxoffset=dyoffset=cxoffset=cyoffset=stxpos=stypos=htxpos=htypos=0;
+  switch(runningText.anim) {
+    case RIGHT_TO_LEFT:
+      dxoffset = WIDTH;
+      cxoffset = -1;
+      stxpos = -(len);
+      htxpos = 0;
+      break;
+    case LEFT_TO_RIGHT:
+      dxoffset = -len;
+      cxoffset = 1;
+      htxpos = WIDTH-(len);
+      stxpos = WIDTH;
+      break;
+    case UP_TO_DOWN:
+      dyoffset = HEIGHT;
+      cyoffset = -1;
+      stypos = -LET_HEIGHT+TEXT_HEIGHT;
+      htypos = 0+TEXT_HEIGHT;
+      break;
+    case DOWN_TO_UP:
+      dyoffset = -LET_HEIGHT;
+      cyoffset = 1;
+      htypos = HEIGHT-LET_HEIGHT;
+      stypos = HEIGHT;
+      break;
+  }
+  xoffset = dxoffset;
+  yoffset = dyoffset;
+}
 
 void setup() {
   //Serial.begin(9600);
   randomSeed(analogRead(0));
-
+  
   // настройки ленты
   //strip.addLeds<WS2812, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
   strip.setBrightness(BRIGHTNESS);
   //if (CURRENT_LIMIT > 0) strip.setMaxPowerInVoltsAndMilliamps(5, CURRENT_LIMIT);
   strip.clear();
   strip.show();
-
-  runningText = String(text1) + text2 + text3 + text4 + text5 + text6 + text7 + text8 + text9 + text10;
-  colorChange[0] = stringLength(text1);
-  colorChange[1] = colorChange[0] + stringLength(text2);
-  colorChange[2] = colorChange[1] + stringLength(text3);
-  colorChange[3] = colorChange[2] + stringLength(text4);
-  colorChange[4] = colorChange[3] + stringLength(text5);
-  colorChange[5] = colorChange[4] + stringLength(text6);
-  colorChange[6] = colorChange[5] + stringLength(text7);
-  colorChange[7] = colorChange[6] + stringLength(text8);
-  colorChange[8] = colorChange[7] + stringLength(text9);
-  colorChange[9] = colorChange[8] + stringLength(text10);
+  
+  setctext();
 }
 
 void loop() {
   fillString(runningText);
+  if (fullTextFlag) {
+    current_text = (current_text+1)%strcount;
+    setctext();
+    fullTextFlag = false;
+  }
+}
+
+ctext get_ctext(int i) {
+  String text = String((char *)pgm_read_word(&(strings[i])));
+  uint8_t anim = pgm_read_byte_near(sanims+i);
+  uint16_t sticktime = pgm_read_byte_near(sticktimes+i);
+  uint32_t color = pgm_read_dword_near(scolors+i);
+  uint8_t rainbow = pgm_read_byte_near(rainbows+i);
+  uint8_t rainbowfade = pgm_read_byte_near(srainbowfades+i);
+  return ctext {
+    color,
+    anim,
+    sticktime,
+    rainbow,
+    rainbowfade,
+    text
+  };
 }
