@@ -37,12 +37,12 @@
 <a id="chapter-3"></a>
 ## Материалы и компоненты
 ### Ссылки оставлены на магазины, с которых я закупаюсь уже не один год
-- Arduino NANO https://ali.ski/O_eT3W  https://ali.ski/MahTW
-- Bluetooth HC-06 https://ali.ski/-zNxK  https://ali.ski/fkffF
-- Матрица MAX7219 https://ali.ski/buqcwG  https://ali.ski/id65D
-- Матрица 32x8 https://ali.ski/Kln1WY  https://ali.ski/dNSLY  https://ali.ski/5Byqi
-- Лента адресная https://ali.ski/R7rBp  https://ali.ski/3eMu-  https://ali.ski/tDIuI
-- БП 5V https://ali.ski/8gc-of  https://ali.ski/ui-Rh
+- Arduino NANO https://ali.ski/SQihi  https://ali.ski/kbhKuC
+- Bluetooth HC-06 https://ali.ski/2ZSOok  https://ali.ski/FcMyMf
+- Матрица MAX7219 https://ali.ski/kxwy2t  https://ali.ski/1SFtH
+- Матрица 32x8 https://ali.ski/D8cerQ  https://ali.ski/iLxVM  https://ali.ski/ZTlyDf
+- Лента адресная https://ali.ski/Fm17II  https://ali.ski/rnHw1E  https://ali.ski/E2T6HS
+- БП 5V https://ali.ski/r0VKdK  https://ali.ski/c2-8D
 
 ## Вам скорее всего пригодится
 * [Всё для пайки (паяльники и примочки)](http://alexgyver.ru/all-for-soldering/)
