@@ -1,45 +1,37 @@
 // работа с бегущим текстом
-
-// **************** НАСТРОЙКИ ****************
-#define TEXT_DIRECTION 1  // 1 - по горизонтали, 0 - по вертикали
-#define MIRR_V 0          // отразить текст по вертикали (0 / 1)
-#define MIRR_H 0          // отразить текст по горизонтали (0 / 1)
-
-#define TEXT_HEIGHT 0     // высота, на которой бежит текст (от низа матрицы)
-#define LET_WIDTH 5       // ширина буквы шрифта
-#define LET_HEIGHT 8      // высота буквы шрифта
-#define SPACE 1           // пробел
-
 // --------------------- ДЛЯ РАЗРАБОТЧИКОВ ----------------------
 
-int offset = WIDTH;
-
-void fillString(String &text) {
+void fillString(ctext &text) {
   if (loadingFlag) {
-    offset = WIDTH;   // перемотка в правый край
     loadingFlag = false;
     fullTextFlag = false;
   }
-
+  
   if (millis() - scrollTimer >= D_TEXT_SPEED) {
-    scrollTimer = millis();
     strip.clear();
     int i = 0, j = 0;
-    while (text[i] != '\0') {
-      if ((byte)text[i] > 191) {    // работаем с русскими буквами!
+    while (text.text[i] != '\0') {
+      if ((byte)text.text[i] > 191) {    // работаем с русскими буквами!
         i++;
       } else {
-        drawLetter(j, text[i], offset + j * (LET_WIDTH + SPACE), setColor(j));
+        drawLetter(j, text.text[i], xoffset + j * (LET_WIDTH + SPACE), yoffset, setColor(text, j));
         i++;
         j++;
       }
     }
-    fullTextFlag = false;
-
-    offset--;
-    if (offset < -j * (LET_WIDTH + SPACE)) {    // строка убежала
-      offset = WIDTH + 3;
-      fullTextFlag = true;
+    if (!fullTextFlag) {
+      xoffset=xoffset+cxoffset;
+      yoffset=yoffset+cyoffset;
+      if ((xoffset == stxpos) && (yoffset == stypos)) {    // строка убежала
+        fullTextFlag = true;
+      }
+    }
+    sticking = false;
+    scrollTimer = millis();
+    if ((xoffset == htxpos) && (yoffset == htypos)) {
+      scrollTimer = millis() + D_TEXT_SPEED - text.sticktime;
+      sticktimer = millis();
+      sticking = true;
     }
     strip.show();
   }
@@ -58,27 +50,77 @@ int stringLength(String &thisString) {
   return j;
 }
 
-uint32_t setColor(int index) {
-  for (byte i = 0; i < 10; i++) {
-    if (index < colorChange[i]) {
-      return pgm_read_dword(&textColors[i]);
+uint32_t setColor(ctext &text, int index) {
+  uint32_t col = text.color;
+  if (text.rainbow > 0) {
+    int cr,cg,cb;
+    cr = (col >> 16) & 0xFF;
+    cg = (col >> 8) & 0xFF;
+    cb = col & 0xFF;
+    int colr = index%5;
+    uint8_t r,g,b;
+    r=g=b=0;
+    switch (colr) {
+      case 0:
+        r = 255;
+        break;
+      case 1:
+        r = 255;
+        g = 255;
+        break;
+      case 2:
+        g = 255;
+        break;
+      case 3:
+        g = 255;
+        b = 255;
+        break;
+      case 4:
+        b = 255;
+        r = 255;
+        break;
     }
+    float fading = (uint8_t)(
+      (float)text.sticktime /
+      (float)(max(millis()-sticktimer,text.sticktime)));
+    float alpha;
+    switch (text.rainbowfade) {
+      case RB_CONSTANT:
+        alpha = (float)text.rainbow / 255;
+        break;
+      case RB_FADE_IN:
+        alpha = fading * (float)(text.rainbow/255);
+        break;
+      case RB_FADE_OUT:
+        alpha = (fading-1) * (float)(text.rainbow/255);
+        break;
+    }
+    col = (
+          ((uint32_t)((float)cr*(1-alpha)+(float)r*alpha) << 16) |
+          ((uint32_t)((float)cg*(1-alpha)+(float)g*alpha) << 8 ) |
+          (uint32_t)((float)cb*(1-alpha)+(float)b*alpha));
   }
+  return col;
 }
 
-void drawLetter(int index, uint8_t letter, int offset, uint32_t letterColor) {
+void drawLetter(int index, uint8_t letter, int offset, int yoffset, uint32_t letterColor) {
   int start_pos = 0, finish_pos = LET_WIDTH;
+  int start_ypos = 0, finish_ypos = LET_HEIGHT;
 
   if (offset < -LET_WIDTH || offset > WIDTH) return;
   if (offset < 0) start_pos = -offset;
   if (offset > (WIDTH - LET_WIDTH)) finish_pos = WIDTH - offset;
+  
+  if (yoffset < -LET_HEIGHT || yoffset > HEIGHT) return;
+  if (yoffset < 0) start_ypos = -yoffset;
+  if (yoffset > (HEIGHT - LET_HEIGHT)) finish_ypos = HEIGHT - offset;
 
   for (int i = start_pos; i < finish_pos; i++) {
     int thisByte;
     if (MIRR_V) thisByte = getFont((byte)letter, LET_WIDTH - 1 - i);
     else thisByte = getFont((byte)letter, i);
 
-    for (byte j = 0; j < LET_HEIGHT; j++) {
+    for (byte j = start_ypos; j < finish_ypos; j++) {
       boolean thisBit;
 
       if (MIRR_H) thisBit = thisByte & (1 << j);
@@ -86,11 +128,11 @@ void drawLetter(int index, uint8_t letter, int offset, uint32_t letterColor) {
 
       // рисуем столбец (i - горизонтальная позиция, j - вертикальная)
       if (TEXT_DIRECTION) {
-        if (thisBit) leds[getPixelNumber(offset + i, TEXT_HEIGHT + j)] = mHEX(letterColor);
-        else drawPixelXY(offset + i, TEXT_HEIGHT + j, 0x000000);
+        if (thisBit) leds[getPixelNumber(offset + i, yoffset + j)] = mHEX(letterColor);
+        else drawPixelXY(offset + i, yoffset + j, 0x000000);
       } else {
-        if (thisBit) leds[getPixelNumber(i, offset + TEXT_HEIGHT + j)] = mHEX(letterColor);
-        else drawPixelXY(i, offset + TEXT_HEIGHT + j, 0x000000);
+        if (thisBit) leds[getPixelNumber(i, offset + yoffset + j)] = mHEX(letterColor);
+        else drawPixelXY(i, offset + yoffset + j, 0x000000);
       }
 
     }
